@@ -1,4 +1,5 @@
-const CATALOG_URL = "https://raw.githubusercontent.com/yaojingang/yao-open-prompts/main/CATALOG.md";
+const RAW_BASE = "https://fastly.jsdelivr.net/gh/yaojingang/yao-open-prompts@main";
+const CATALOG_URL = `${RAW_BASE}/CATALOG.md`;
 
 export function parseCatalogMarkdown(md) {
   const lines = String(md || "").split(/\r?\n/)
@@ -38,7 +39,7 @@ export function parseCatalogMarkdown(md) {
       status,
       mainTag,
       path,
-      rawUrl: `https://raw.githubusercontent.com/yaojingang/yao-open-prompts/main/${path}`,
+      rawUrl: `${RAW_BASE}/${path}`,
       webUrl: `https://github.com/yaojingang/yao-open-prompts/blob/main/${path}`
     })
   }

@@ -4,6 +4,7 @@ import { Search, Heart, Copy, Share2, ArrowLeft, RefreshCw, ChevronRight, Github
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchCatalog, getCategories } from './utils/catalog';
 import { parsePromptMarkdown } from './utils/promptParser';
+import bundleData from './data/bundle.json';
 import './App.css';
 
 // --- Components ---
@@ -42,9 +43,9 @@ const Header = ({ query, setQuery, itemCount }) => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-3xl font-black tracking-tight text-slate-900 mb-2 font-mono"
+        className="text-3xl font-black tracking-tight text-slate-900 mb-2"
       >
-        YAO_PROMPTS
+        精选提示词
       </motion.h1>
       <motion.p 
         initial={{ opacity: 0 }}
@@ -119,9 +120,7 @@ const PromptCard = ({ item, onClick }) => {
 
 // --- Pages ---
 
-const DiscoverPage = ({ items, setDetailItem }) => {
-  const [query, setQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('全部');
+const DiscoverPage = ({ items, query, setQuery, activeCategory, setActiveCategory }) => {
   const navigate = useNavigate();
 
   const categories = useMemo(() => {
@@ -212,11 +211,36 @@ const DetailPage = ({ items }) => {
     setIsFav(favs.includes(item.id));
 
     const loadContent = async () => {
+      // 1. Try Bundled Data (Instant)
+      if (bundleData[item.id]) {
+        const parsed = parsePromptMarkdown(bundleData[item.id].content);
+        setData(parsed);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Try Cache
+      const cacheKey = `prompt_cache_${item.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          setData(JSON.parse(cached));
+          setLoading(false);
+          return;
+        } catch (e) {
+          localStorage.removeItem(cacheKey);
+        }
+      }
+
+      // 3. Fetch from CDN (Fallback)
       setLoading(true);
       try {
         const res = await fetch(item.rawUrl);
         const md = await res.text();
-        setData(parsePromptMarkdown(md));
+        const parsed = parsePromptMarkdown(md);
+        setData(parsed);
+        // Save to Cache
+        localStorage.setItem(cacheKey, JSON.stringify(parsed));
       } catch (err) {
         console.error(err);
       } finally {
@@ -334,6 +358,10 @@ const DetailPage = ({ items }) => {
 export default function App() {
   const [items, setItems] = useState([]);
   const [ready, setReady] = useState(false);
+  
+  // Persist discovery state
+  const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('全部');
 
   useEffect(() => {
     const load = async () => {
@@ -358,9 +386,17 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
-        <Route path="/" element={<DiscoverPage items={items} />} />
+        <Route path="/" element={
+          <DiscoverPage 
+            items={items} 
+            query={query} 
+            setQuery={setQuery} 
+            activeCategory={activeCategory} 
+            setActiveCategory={setActiveCategory} 
+          />
+        } />
         <Route path="/favorites" element={<FavoritesPage items={items} />} />
         <Route path="/detail/:id" element={<DetailPage items={items} />} />
       </Routes>
