@@ -1,0 +1,68 @@
+:root {
+  --primary: #06b6d4; /* Cyan */
+  --primary-glow: rgba(6, 182, 212, 0.5);
+  --bg-gradient: radial-gradient(circle at top right, #0f172a 0%, #020617 100%);
+  --card-bg: rgba(30, 41, 59, 0.4);
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: rgba(51, 65, 85, 0.5);
+  --shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+  --shadow-lg: 0 0 40px rgba(6, 182, 212, 0.2);
+  --accent: #8b5cf6; /* Purple */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #020617;
+  min-height: 100vh;
+  position: relative;
+  box-shadow: 0 0 100px rgba(0,0,0,0.5);
+}
+
+@media (min-width: 600px) {
+  #root {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Safe Area for Mobile */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
